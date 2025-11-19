@@ -1,0 +1,32 @@
+<svg width="512" height="512" viewBox="0 0 512 512" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="bgGhostLove" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#e0f2fe"/>
+      <stop offset="60%" stop-color="#a5b4fc"/>
+      <stop offset="100%" stop-color="#4f46e5"/>
+    </linearGradient>
+    <filter id="shadowGhostLove" x="-20%" y="-20%" width="140%" height="160%">
+      <feDropShadow dx="0" dy="26" stdDeviation="18" flood-color="#111827" flood-opacity="0.55"/>
+    </filter>
+  </defs>
+
+  <rect x="40" y="40" width="432" height="432" rx="140"
+        fill="url(#bgGhostLove)" filter="url(#shadowGhostLove)"/>
+
+  <!-- Ghost body -->
+  <path d="M164 332 C 164 252 188 184 256 184 C 324 184 348 252 348 332 C 332 320 316 320 300 332 C 284 320 268 320 252 332 C 236 320 220 320 204 332 C 188 320 176 320 164 332Z"
+        fill="#f9fafb" stroke="#e5e7eb" stroke-width="8"/>
+
+  <!-- Eyes -->
+  <circle cx="230" cy="238" r="10" fill="#111827"/>
+  <circle cx="282" cy="238" r="10" fill="#111827"/>
+
+  <!-- Mouth -->
+  <path d="M226 268 Q 256 292 286 268" stroke="#111827" stroke-width="8" stroke-linecap="round" fill="none"/>
+
+  <!-- Heart -->
+  <path d="M206 212 C 196 198 176 196 166 208 C 154 222 160 244 186 262 C 212 244 218 222 206 208Z"
+        fill="#fb7185" stroke="#fecaca" stroke-width="6"/>
+</svg>
+
+

@@ -1,0 +1,42 @@
+<svg width="512" height="512" viewBox="0 0 512 512" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <radialGradient id="faceGradient" cx="30%" cy="0%" r="80%">
+      <stop offset="0%" stop-color="#fffb9a"/>
+      <stop offset="45%" stop-color="#ffdd55"/>
+      <stop offset="100%" stop-color="#f59e0b"/>
+    </radialGradient>
+    <filter id="shadow" x="-20%" y="-20%" width="140%" height="160%">
+      <feDropShadow dx="0" dy="26" stdDeviation="18" flood-color="#111827" flood-opacity="0.55"/>
+    </filter>
+  </defs>
+
+  <rect x="40" y="40" width="432" height="432" rx="140"
+        fill="url(#faceGradient)" filter="url(#shadow)"/>
+
+  <!-- Eyes -->
+  <g transform="translate(0,20)">
+    <!-- Left eye (laughing) -->
+    <path d="M150 210 Q 176 190 202 210" stroke="#7c2d12" stroke-width="16" stroke-linecap="round" fill="none"/>
+    <!-- Right eye (crying) -->
+    <circle cx="312" cy="210" r="18" fill="#111827"/>
+    <circle cx="306" cy="204" r="6" fill="#fef9c3"/>
+  </g>
+
+  <!-- Mouth -->
+  <path d="M160 290 Q 256 350 352 290 Q 320 360 256 382 Q 192 360 160 290Z"
+        fill="#b91c1c" stroke="#7f1d1d" stroke-width="6"/>
+
+  <!-- Laugh tear (left) -->
+  <g transform="translate(110,260) rotate(-18)">
+    <path d="M0 0 C -14 38 -6 64 18 80 C 42 64 50 38 36 0 Z" fill="#38bdf8" stroke="#0e7490" stroke-width="5"/>
+    <path d="M10 8 C 4 26 10 38 20 44 C 30 38 36 26 30 8 Z" fill="#e0f2fe"/>
+  </g>
+
+  <!-- Cry tear (right) -->
+  <g transform="translate(340,260) rotate(12)">
+    <path d="M0 0 C -14 38 -6 64 18 80 C 42 64 50 38 36 0 Z" fill="#38bdf8" stroke="#0e7490" stroke-width="5"/>
+    <path d="M10 8 C 4 26 10 38 20 44 C 30 38 36 26 30 8 Z" fill="#e0f2fe"/>
+  </g>
+</svg>
+
+
