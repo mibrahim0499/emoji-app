@@ -6,23 +6,16 @@ export type EmojiMix = {
   label: string;
 };
 
-// Base emoji set for the prototype – small but expressive.
-export const baseEmojis: string[] = [
-  "😀",
-  "😍",
-  "🤣",
-  "😭",
-  "😡",
-  "😎",
-  "🤔",
-  "😴",
-  "👻",
-  "💩",
-  "❤️",
-  "🔥",
-  "🌈",
-  "💀",
-];
+export type EmojiMeta = {
+  emoji: string;
+  codepoint: string;
+  name: string;
+  keywords: string[];
+  category: string;
+  subcategory: string;
+  order: number;
+  hasMix: boolean;
+};
 
 /**
  * Convert an emoji character into the codepoint string format used by emoji.json.

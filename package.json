@@ -8,7 +8,9 @@
     "build": "tsc -b && vite build",
     "lint": "eslint .",
     "preview": "vite preview",
-    "build:pair-mixes": "node scripts/buildPairMixes.mjs"
+    "build:pair-mixes": "node scripts/buildPairMixes.mjs",
+    "build:emoji-index": "node scripts/buildEmojiIndex.mjs",
+    "build:emoji-data": "npm run build:pair-mixes && npm run build:emoji-index"
   },
   "dependencies": {
     "react": "^19.2.0",

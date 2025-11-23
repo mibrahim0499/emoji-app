@@ -1,10 +1,10 @@
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import "./App.css";
 import {
-  baseEmojis,
   emojiToCodepointSequence,
   normalizeCodepointPair,
   type EmojiMix,
+  type EmojiMeta,
 } from "./data/emojiMixes";
 import { EmojiPicker } from "./components/EmojiPicker";
 import { SelectionBar } from "./components/SelectionBar";
@@ -27,38 +27,63 @@ type PairMixesData = {
   pairs: Record<string, PairMixEntry>;
 };
 
+type EmojiIndexData = {
+  generatedAt: string;
+  count: number;
+  emojis: EmojiMeta[];
+};
+
 function App() {
   const [emojiA, setEmojiA] = useState<string | null>(null);
   const [emojiB, setEmojiB] = useState<string | null>(null);
   const [pairData, setPairData] = useState<PairMixesData | null>(null);
   const [pairsError, setPairsError] = useState<string | null>(null);
+  const [emojiIndex, setEmojiIndex] = useState<EmojiMeta[] | null>(null);
+  const [emojiIndexError, setEmojiIndexError] = useState<string | null>(null);
+  const [isLoadingPairs, setIsLoadingPairs] = useState<boolean>(false);
+
+  const loadPairs = useCallback(async () => {
+    setIsLoadingPairs(true);
+    setPairsError(null);
+
+    try {
+      const response = await fetch("/pairMixes.json");
+      if (!response.ok) {
+        throw new Error(`Failed to load pairMixes.json (${response.status})`);
+      }
+      const json = (await response.json()) as PairMixesData;
+      setPairData(json);
+    } catch (error) {
+      console.error(error);
+      setPairsError("Could not load emoji mix catalog. Please try again.");
+      setPairData(null);
+    } finally {
+      setIsLoadingPairs(false);
+    }
+  }, []);
 
   useEffect(() => {
-    let cancelled = false;
+    void loadPairs();
+  }, [loadPairs]);
 
-    const loadPairs = async () => {
+  useEffect(() => {
+    const loadEmojiIndex = async () => {
       try {
-        const response = await fetch("/pairMixes.json");
+        const response = await fetch("/emojiIndex.json");
         if (!response.ok) {
-          throw new Error(`Failed to load pairMixes.json (${response.status})`);
+          throw new Error(`Failed to load emojiIndex.json (${response.status})`);
         }
-        const json = (await response.json()) as PairMixesData;
-        if (!cancelled) {
-          setPairData(json);
-        }
+        const json = (await response.json()) as EmojiIndexData;
+        // Only keep emojis that actually have mixes to keep the grid relevant.
+        setEmojiIndex(json.emojis.filter((item) => item.hasMix));
       } catch (error) {
-        if (!cancelled) {
-          console.error(error);
-          setPairsError("Could not load emoji mix catalog.");
-        }
+        console.error(error);
+        setEmojiIndexError("Could not load emoji list.");
+        setEmojiIndex(null);
       }
     };
 
-    loadPairs();
-
-    return () => {
-      cancelled = true;
-    };
+    void loadEmojiIndex();
   }, []);
 
   const handleEmojiClick = (emoji: string) => {
@@ -101,19 +126,40 @@ function App() {
   };
 
   const mix = computeMix();
-  const isLoadingPairs = !pairData && !pairsError;
 
   return (
     <div className="app">
       <header className="app-header">
+        <div className="app-badge-row">
+          <span className="app-badge">Demo</span>
+          {isLoadingPairs && (
+            <span className="app-loader" aria-live="polite">
+              Loading emoji catalog…
+            </span>
+          )}
+        </div>
         <h1>Emoji Mixer</h1>
         <p className="app-subtitle">
-          Pick two emojis and see if there&apos;s a fun mashup powered by a
-          large Emoji Kitchen-style catalog.
-          {isLoadingPairs && " Loading mix data…"}
-          {pairsError && ` ${pairsError}`}
+          Pick two emojis and see if there&apos;s a fun mashup, powered by a
+          large Emoji Kitchen-style catalog. Perfect for exploring fun sticker
+          combinations in your browser.
         </p>
       </header>
+
+      {pairsError && (
+        <div className="app-alert" role="status">
+          <span className="app-alert-text">{pairsError}</span>
+          <button
+            type="button"
+            className="app-alert-button"
+            onClick={() => {
+              void loadPairs();
+            }}
+          >
+            Retry
+          </button>
+        </div>
+      )}
 
       <main className="app-layout">
         <section className="app-column app-column-left">
@@ -124,11 +170,14 @@ function App() {
             onSwap={handleSwap}
           />
           <EmojiPicker
-            emojis={baseEmojis}
+            emojis={emojiIndex ?? []}
             emojiA={emojiA}
             emojiB={emojiB}
             onEmojiClick={handleEmojiClick}
           />
+          {emojiIndexError && (
+            <p className="app-footer-hint">{emojiIndexError}</p>
+          )}
         </section>
         <section className="app-column app-column-right">
           <MixResult mix={mix} emojiA={emojiA} emojiB={emojiB} />
