@@ -16,6 +16,7 @@
   background: rgba(255, 255, 255, 0.9);
   border: 1px solid rgba(148, 163, 184, 0.3);
   box-shadow: 0 14px 30px rgba(15, 23, 42, 0.12);
+  position: relative;
 }
 
 .mix-result-preview {
@@ -71,6 +72,46 @@
   color: #4b5563;
 }
 
+.mix-actions {
+  margin-top: 0.75rem;
+  display: flex;
+  gap: 0.5rem;
+}
+
+.mix-action-button {
+  border-radius: 999px;
+  border: none;
+  padding: 0.35rem 0.9rem;
+  font-size: 0.8rem;
+  font-weight: 500;
+  cursor: pointer;
+  background: #111827;
+  color: #f9fafb;
+}
+
+.mix-action-button--secondary {
+  background: #ffffff;
+  color: #111827;
+  border: 1px solid #e5e7eb;
+}
+
+.mix-favorite-toggle {
+  position: absolute;
+  top: 0.75rem;
+  right: 0.75rem;
+  border-radius: 999px;
+  border: 1px solid #e5e7eb;
+  padding: 0.15rem 0.55rem;
+  font-size: 0.8rem;
+  background: #ffffff;
+  cursor: pointer;
+  box-shadow: 0 2px 6px rgba(15, 23, 42, 0.25);
+}
+
+.mix-favorite-toggle:hover {
+  border-color: #f97316;
+}
+
 .mix-suggestions {
   margin-top: 0.9rem;
 }
@@ -105,6 +146,40 @@
   background: #eef2ff;
   border-color: #4f46e5;
   transform: translateY(-0.5px);
+}
+
+.mix-list {
+  margin-top: 1rem;
+}
+
+.mix-list-title {
+  margin: 0 0 0.25rem;
+  font-size: 0.85rem;
+  color: #6b7280;
+}
+
+.mix-list-row {
+  display: flex;
+  flex-wrap: nowrap;
+  gap: 0.35rem;
+  overflow-x: auto;
+  padding-bottom: 0.25rem;
+}
+
+.mix-list-chip {
+  border-radius: 999px;
+  border: 1px solid #e5e7eb;
+  padding: 0.2rem 0.65rem;
+  font-size: 0.8rem;
+  background: #f9fafb;
+  color: #111827;
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+.mix-list-chip:hover {
+  background: #eef2ff;
+  border-color: #4f46e5;
 }
 
 

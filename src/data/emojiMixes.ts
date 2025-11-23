@@ -37,3 +37,15 @@ export const normalizeCodepointPair = (a: string, b: string): string => {
   return [a.toLowerCase(), b.toLowerCase()].sort().join("+");
 };
 
+export const codepointSequenceToEmoji = (sequence: string): string => {
+  const parts = sequence.split("-");
+  const values: number[] = [];
+  for (const part of parts) {
+    const parsed = Number.parseInt(part, 16);
+    if (!Number.isNaN(parsed)) {
+      values.push(parsed);
+    }
+  }
+  return String.fromCodePoint(...values);
+};
+

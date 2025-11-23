@@ -5,6 +5,7 @@ import {
   normalizeCodepointPair,
   type EmojiMix,
   type EmojiMeta,
+  codepointSequenceToEmoji,
 } from "./data/emojiMixes";
 import { EmojiPicker } from "./components/EmojiPicker";
 import { SelectionBar } from "./components/SelectionBar";
@@ -40,6 +41,13 @@ type MixSuggestion = {
   label: string;
 };
 
+type MixSummary = {
+  id: string;
+  emojiA: string;
+  emojiB: string;
+  label: string;
+};
+
 function App() {
   const [emojiA, setEmojiA] = useState<string | null>(null);
   const [emojiB, setEmojiB] = useState<string | null>(null);
@@ -47,6 +55,11 @@ function App() {
   const [pairsError, setPairsError] = useState<string | null>(null);
   const [emojiIndex, setEmojiIndex] = useState<EmojiMeta[] | null>(null);
   const [emojiIndexError, setEmojiIndexError] = useState<string | null>(null);
+  const [history, setHistory] = useState<MixSummary[]>([]);
+  const [favorites, setFavorites] = useState<MixSummary[]>([]);
+
+  const HISTORY_KEY = "emoji-mixer:history";
+  const FAVORITES_KEY = "emoji-mixer:favorites";
   const [isLoadingPairs, setIsLoadingPairs] = useState<boolean>(false);
 
   const loadPairs = useCallback(async () => {
@@ -66,6 +79,22 @@ function App() {
       setPairData(null);
     } finally {
       setIsLoadingPairs(false);
+    }
+  }, []);
+
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    const a = params.get("a");
+    const b = params.get("b");
+    if (a && b) {
+      try {
+        const emoji1 = codepointSequenceToEmoji(a);
+        const emoji2 = codepointSequenceToEmoji(b);
+        setEmojiA(emoji1);
+        setEmojiB(emoji2);
+      } catch {
+        // ignore malformed params
+      }
     }
   }, []);
 
@@ -115,6 +144,26 @@ function App() {
     }
     return map;
   }, [emojiIndex]);
+
+  useEffect(() => {
+    try {
+      const rawHistory = window.localStorage.getItem(HISTORY_KEY);
+      if (rawHistory) {
+        setHistory(JSON.parse(rawHistory) as MixSummary[]);
+      }
+    } catch {
+      // ignore
+    }
+
+    try {
+      const rawFavorites = window.localStorage.getItem(FAVORITES_KEY);
+      if (rawFavorites) {
+        setFavorites(JSON.parse(rawFavorites) as MixSummary[]);
+      }
+    } catch {
+      // ignore
+    }
+  }, []);
 
   const handleEmojiClick = (emoji: string) => {
     if (!emojiA) {
@@ -209,6 +258,91 @@ function App() {
     return results;
   }, [emojiA, emojiB, emojiByCodepoint, pairData, partnerIndex]);
 
+  useEffect(() => {
+    if (!mix || !emojiA || !emojiB) return;
+
+    setHistory((prev) => {
+      const nextItem: MixSummary = {
+        id: mix.id,
+        emojiA,
+        emojiB,
+        label: mix.label,
+      };
+      const filtered = prev.filter((item) => item.id !== mix.id);
+      const updated = [nextItem, ...filtered].slice(0, 20);
+      try {
+        window.localStorage.setItem(HISTORY_KEY, JSON.stringify(updated));
+      } catch {
+        // ignore storage errors
+      }
+      return updated;
+    });
+  }, [emojiA, emojiB, mix]);
+
+  const isCurrentFavorite = useMemo(() => {
+    if (!mix) return false;
+    return favorites.some((item) => item.id === mix.id);
+  }, [favorites, mix]);
+
+  const handleToggleFavorite = () => {
+    if (!mix || !emojiA || !emojiB) return;
+    setFavorites((prev) => {
+      const exists = prev.some((item) => item.id === mix.id);
+      let updated: MixSummary[];
+      if (exists) {
+        updated = prev.filter((item) => item.id !== mix.id);
+      } else {
+        const next: MixSummary = {
+          id: mix.id,
+          emojiA,
+          emojiB,
+          label: mix.label,
+        };
+        updated = [next, ...prev].slice(0, 30);
+      }
+      try {
+        window.localStorage.setItem(FAVORITES_KEY, JSON.stringify(updated));
+      } catch {
+        // ignore
+      }
+      return updated;
+    });
+  };
+
+  const handleSelectSummary = (summary: MixSummary) => {
+    setEmojiA(summary.emojiA);
+    setEmojiB(summary.emojiB);
+  };
+
+  useEffect(() => {
+    if (!emojiA || !emojiB) return;
+    const aSeq = emojiToCodepointSequence(emojiA);
+    const bSeq = emojiToCodepointSequence(emojiB);
+    const params = new URLSearchParams(window.location.search);
+    params.set("a", aSeq);
+    params.set("b", bSeq);
+    const newUrl = `${window.location.pathname}?${params.toString()}`;
+    window.history.replaceState({}, "", newUrl);
+  }, [emojiA, emojiB]);
+
+  const handleCopyLink = async () => {
+    try {
+      await navigator.clipboard.writeText(window.location.href);
+    } catch {
+      // ignore
+    }
+  };
+
+  const handleDownload = () => {
+    if (!mix) return;
+    const link = document.createElement("a");
+    link.href = mix.imageUrl;
+    link.download = mix.id || "emoji-mix";
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  };
+
   return (
     <div className="app">
       <header className="app-header">
@@ -272,6 +406,13 @@ function App() {
               setEmojiA(a);
               setEmojiB(b);
             }}
+            isFavorite={isCurrentFavorite}
+            onToggleFavorite={handleToggleFavorite}
+            history={history}
+            favorites={favorites}
+            onSelectSummary={handleSelectSummary}
+            onCopyLink={handleCopyLink}
+            onDownload={handleDownload}
           />
         </section>
       </main>
