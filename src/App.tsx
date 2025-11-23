@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import "./App.css";
 import {
   emojiToCodepointSequence,
@@ -31,6 +31,13 @@ type EmojiIndexData = {
   generatedAt: string;
   count: number;
   emojis: EmojiMeta[];
+};
+
+type MixSuggestion = {
+  id: string;
+  emojiA: string;
+  emojiB: string;
+  label: string;
 };
 
 function App() {
@@ -86,6 +93,29 @@ function App() {
     void loadEmojiIndex();
   }, []);
 
+  const partnerIndex = useMemo(() => {
+    if (!pairData) return {};
+    const map: Record<string, Set<string>> = {};
+    for (const entry of Object.values(pairData.pairs)) {
+      const a = entry.leftEmojiCodepoint.toLowerCase();
+      const b = entry.rightEmojiCodepoint.toLowerCase();
+      if (!map[a]) map[a] = new Set<string>();
+      if (!map[b]) map[b] = new Set<string>();
+      map[a].add(b);
+      map[b].add(a);
+    }
+    return map;
+  }, [pairData]);
+
+  const emojiByCodepoint = useMemo(() => {
+    if (!emojiIndex) return {};
+    const map: Record<string, EmojiMeta> = {};
+    for (const item of emojiIndex) {
+      map[item.codepoint.toLowerCase()] = item;
+    }
+    return map;
+  }, [emojiIndex]);
+
   const handleEmojiClick = (emoji: string) => {
     if (!emojiA) {
       setEmojiA(emoji);
@@ -126,6 +156,58 @@ function App() {
   };
 
   const mix = computeMix();
+  const highlightPartners = useMemo(() => {
+    if (!emojiA) return undefined;
+    const seq = emojiToCodepointSequence(emojiA);
+    return partnerIndex[seq];
+  }, [emojiA, partnerIndex]);
+
+  const suggestions: MixSuggestion[] = useMemo(() => {
+    if (!emojiA || !emojiB || !emojiByCodepoint) return [];
+    const seqA = emojiToCodepointSequence(emojiA);
+    const seqB = emojiToCodepointSequence(emojiB);
+    const partnersA = partnerIndex[seqA];
+    const partnersB = partnerIndex[seqB];
+    const results: MixSuggestion[] = [];
+
+    if (partnersA) {
+      for (const cp of partnersA) {
+        if (cp === seqB) continue;
+        const key = normalizeCodepointPair(seqA, cp);
+        const pair = pairData?.pairs[key];
+        const meta = emojiByCodepoint[cp];
+        if (pair && meta) {
+          results.push({
+            id: key,
+            emojiA,
+            emojiB: meta.emoji,
+            label: pair.alt ?? meta.name ?? "Suggested mix",
+          });
+        }
+        if (results.length >= 3) break;
+      }
+    }
+
+    if (results.length < 3 && partnersB) {
+      for (const cp of partnersB) {
+        if (cp === seqA) continue;
+        const key = normalizeCodepointPair(cp, seqB);
+        const pair = pairData?.pairs[key];
+        const meta = emojiByCodepoint[cp];
+        if (pair && meta) {
+          results.push({
+            id: key,
+            emojiA: meta.emoji,
+            emojiB,
+            label: pair.alt ?? meta.name ?? "Suggested mix",
+          });
+        }
+        if (results.length >= 5) break;
+      }
+    }
+
+    return results;
+  }, [emojiA, emojiB, emojiByCodepoint, pairData, partnerIndex]);
 
   return (
     <div className="app">
@@ -174,13 +256,23 @@ function App() {
             emojiA={emojiA}
             emojiB={emojiB}
             onEmojiClick={handleEmojiClick}
+            highlightCodepoints={highlightPartners}
           />
           {emojiIndexError && (
             <p className="app-footer-hint">{emojiIndexError}</p>
           )}
         </section>
         <section className="app-column app-column-right">
-          <MixResult mix={mix} emojiA={emojiA} emojiB={emojiB} />
+          <MixResult
+            mix={mix}
+            emojiA={emojiA}
+            emojiB={emojiB}
+            suggestions={suggestions}
+            onApplySuggestion={(a, b) => {
+              setEmojiA(a);
+              setEmojiB(b);
+            }}
+          />
         </section>
       </main>
     </div>

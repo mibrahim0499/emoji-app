@@ -71,4 +71,40 @@
   color: #4b5563;
 }
 
+.mix-suggestions {
+  margin-top: 0.9rem;
+}
+
+.mix-suggestions-title {
+  margin: 0 0 0.25rem;
+  font-size: 0.85rem;
+  color: #6b7280;
+}
+
+.mix-suggestions-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.35rem;
+}
+
+.mix-suggestion-chip {
+  border-radius: 999px;
+  border: 1px solid #e5e7eb;
+  padding: 0.2rem 0.65rem;
+  font-size: 0.8rem;
+  background: #ffffff;
+  color: #111827;
+  cursor: pointer;
+  transition:
+    background-color 120ms ease,
+    border-color 120ms ease,
+    transform 80ms ease;
+}
+
+.mix-suggestion-chip:hover {
+  background: #eef2ff;
+  border-color: #4f46e5;
+  transform: translateY(-0.5px);
+}
+
 

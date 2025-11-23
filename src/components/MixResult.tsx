@@ -5,9 +5,22 @@ type MixResultProps = {
   mix: EmojiMix | null;
   emojiA: string | null;
   emojiB: string | null;
+  suggestions: {
+    id: string;
+    emojiA: string;
+    emojiB: string;
+    label: string;
+  }[];
+  onApplySuggestion: (emojiA: string, emojiB: string) => void;
 };
 
-export const MixResult = ({ mix, emojiA, emojiB }: MixResultProps) => {
+export const MixResult = ({
+  mix,
+  emojiA,
+  emojiB,
+  suggestions,
+  onApplySuggestion,
+}: MixResultProps) => {
   const hasBothSelected = Boolean(emojiA && emojiB);
 
   let message = "Pick two emojis to see if there is a mix.";
@@ -41,6 +54,28 @@ export const MixResult = ({ mix, emojiA, emojiB }: MixResultProps) => {
         </div>
         <p className="mix-result-message">{message}</p>
       </div>
+      {!mix && hasBothSelected && suggestions.length > 0 && (
+        <div className="mix-suggestions">
+          <p className="mix-suggestions-title">Try one of these instead:</p>
+          <div className="mix-suggestions-row">
+            {suggestions.map((suggestion) => (
+              <button
+                key={suggestion.id}
+                type="button"
+                className="mix-suggestion-chip"
+                onClick={() =>
+                  onApplySuggestion(suggestion.emojiA, suggestion.emojiB)
+                }
+                aria-label={suggestion.label}
+              >
+                <span aria-hidden="true">
+                  {suggestion.emojiA} + {suggestion.emojiB}
+                </span>
+              </button>
+            ))}
+          </div>
+        </div>
+      )}
     </div>
   );
 };

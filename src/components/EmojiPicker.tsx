@@ -7,6 +7,7 @@ type EmojiPickerProps = {
   emojiA: string | null;
   emojiB: string | null;
   onEmojiClick: (emoji: string) => void;
+  highlightCodepoints?: Set<string>;
 };
 
 const CATEGORY_ORDER = [
@@ -40,6 +41,7 @@ export const EmojiPicker = ({
   emojiA,
   emojiB,
   onEmojiClick,
+  highlightCodepoints,
 }: EmojiPickerProps) => {
   const [search, setSearch] = useState("");
   const [activeCategory, setActiveCategory] = useState<string>("smileys & emotion");
@@ -123,12 +125,18 @@ export const EmojiPicker = ({
         {hasResults ? (
           filteredEmojis.map((item) => {
             const isSelected = item.emoji === emojiA || item.emoji === emojiB;
+            const hasMixWithPrimary =
+              highlightCodepoints?.has(item.codepoint) ?? false;
             return (
               <button
                 key={item.codepoint}
                 type="button"
                 className={`emoji-button${
                   isSelected ? " emoji-button--selected" : ""
+                }${
+                  !isSelected && hasMixWithPrimary
+                    ? " emoji-button--has-mix"
+                    : ""
                 }`}
                 onClick={() => onEmojiClick(item.emoji)}
                 aria-label={item.name || item.emoji}

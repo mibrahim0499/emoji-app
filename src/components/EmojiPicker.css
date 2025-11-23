@@ -116,6 +116,23 @@
   box-shadow: 0 0 0 1px rgba(79, 70, 229, 0.5);
 }
 
+.emoji-button--has-mix {
+  position: relative;
+  border-color: rgba(96, 165, 250, 0.9);
+}
+
+.emoji-button--has-mix::after {
+  content: "";
+  position: absolute;
+  top: 6px;
+  right: 6px;
+  width: 8px;
+  height: 8px;
+  border-radius: 999px;
+  background: #22c55e;
+  box-shadow: 0 0 0 2px rgba(240, 253, 250, 0.9);
+}
+
 .emoji-glyph {
   font-size: 1.75rem;
 }
